@@ -12,19 +12,19 @@ const CONFIG = {
 
   // Personal calendars whose busy times should block work time.
   // Share each with your work account as "See only free/busy".
-  // Do NOT include the "Work busy" calendar here.
+  // Do NOT include the "Work Busy" calendar here.
   PERSONAL_SOURCE_CALENDAR_IDS: [
     'you@example.com',
     // 'xxxxxxxx@group.calendar.google.com', // another personal calendar
   ],
 
-  // The personal "Work busy" calendar that receives work blocks.
+  // The personal "Work Busy" calendar that receives work blocks.
   // Share it with your work account as "Make changes to events".
   PERSONAL_TARGET_CALENDAR_ID: 'xxxxxxxx@group.calendar.google.com',
 
   // Titles for the blocks the script creates.
   WORK_BLOCK_TITLE: 'Busy',
-  PERSONAL_BLOCK_TITLE: 'Work',
+  PERSONAL_BLOCK_TITLE: 'Work Meetings',
 
   // How far ahead to sync, and how often (1, 5, 10, 15 or 30 minutes).
   DAYS_AHEAD: 14,

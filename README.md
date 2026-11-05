@@ -1,9 +1,9 @@
-# Calendar sync
+# Calendar Sync
 
 An Apps Script project that runs in your **work** Google account and keeps busy time in sync:
 
 - **Personal → work:** busy times from your personal calendars become "Busy" blocks on your work calendar. Only free/busy is read, never titles or details.
-- **Work → personal:** your work meetings become "Work" blocks on a dedicated "Work busy" calendar in your personal account.
+- **Work → personal:** your work meetings become "Work Meetings" blocks on a dedicated "Work Busy" calendar in your personal account.
 
 Blocks have no reminders, show as busy, and are private. Every block is tagged, so the script never copies its own blocks (no loops) and never edits or deletes your real events.
 
@@ -13,14 +13,14 @@ By default it syncs from yesterday through 14 days ahead every 15 minutes, and s
 
 In your **personal** Google Calendar:
 
-1. Create a new calendar called **Work busy**.
-2. Share **Work busy** with your work address: **Make changes to events**.
+1. Create a new calendar called **Work Busy**.
+2. Share **Work Busy** with your work address: **Make changes to events**.
 3. Share each personal calendar that should block work time with your work address: **See only free/busy (hide details)**.
 4. Note each calendar's ID (Settings → the calendar → *Integrate calendar*).
 
 In your **work** account, accept the shares if prompted (or add each calendar via *Other calendars → Subscribe*).
 
-If you get emails when the script adds blocks to Work busy, turn off its email notifications in that calendar's settings.
+If you get emails when the script adds blocks to Work Busy, turn off its email notifications in that calendar's settings.
 
 ## 2. Set up clasp
 
@@ -37,7 +37,7 @@ Signed in as your **work** account:
 3. Skip this step if `.clasp.json` already exists. Otherwise create your own project (this writes `.clasp.json`, which is gitignored because it points at your project):
 
    ```sh
-   npx clasp create --type standalone --title "Calendar sync" --rootDir src
+   npx clasp create --type standalone --title "Calendar Sync" --rootDir src
    git checkout -- src/appsscript.json
    ```
 
@@ -60,14 +60,14 @@ Signed in as your **work** account:
    ```
 
 4. Open the editor with `npm run open`.
-5. Run **syncNow** once from the editor and approve the permissions. Your account will show an "unverified app" screen, which is normal for your own script: *Advanced → Go to Calendar sync*.
+5. Run **syncNow** once from the editor and approve the permissions. Your account will show an "unverified app" screen, which is normal for your own script: *Advanced → Go to Calendar Sync*.
 6. Check the execution log, then run **installTrigger** to sync automatically.
 
 ## Day to day
 
 - Change settings: edit `src/Config.js`, then `npm run push`. The trigger picks up the new code on its next run.
 - Pause: run **uninstallTrigger**.
-- Remove everything: run **removeAllBlocks**. It stops the trigger and deletes every block the script made.
+- Remove everything: run **removeAllBlocks**. It stops the trigger and deletes every block the script ever made, however old. With a lot of history it may stop after about 5 minutes; the log then says how many blocks are left, so run it again until it says "All blocks removed."
 - Errors: Apps Script emails you failed-run summaries. Logs are under *Executions* in the editor.
 
 ## Notes

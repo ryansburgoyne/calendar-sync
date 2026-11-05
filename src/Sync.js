@@ -3,7 +3,7 @@
  * Runs in the WORK account. See README.md for setup.
  *
  *   Personal calendars (free/busy only) --> "Busy" blocks on the work calendar
- *   Work calendar (full events)          --> "Work" blocks on the personal "Work busy" calendar
+ *   Work calendar (full events)          --> "Work Meetings" blocks on the personal "Work Busy" calendar
  *
  * Every block this script creates is tagged with a private extended property.
  * The script skips tagged events when reading, and only ever edits or deletes
@@ -12,7 +12,7 @@
 
 const TAG_KEY = 'calsync';
 const TAG_FROM_PERSONAL = 'from-personal'; // blocks on the work calendar
-const TAG_FROM_WORK = 'from-work';         // blocks on the personal "Work busy" calendar
+const TAG_FROM_WORK = 'from-work';         // blocks on the personal "Work Busy" calendar
 
 // Work event types that shouldn't block personal time.
 const SKIP_EVENT_TYPES = ['outOfOffice', 'workingLocation', 'birthday'];
@@ -58,15 +58,35 @@ function uninstallTrigger() {
   console.log('Trigger removed.');
 }
 
-/** Stops syncing and deletes every block this script created (past 30 days onward). */
+/**
+ * Stops syncing and deletes every block this script ever created, however old.
+ * Stops after about 5 minutes to stay under Apps Script's 6-minute limit;
+ * if blocks are left, the log says so and you can run it again.
+ */
 function removeAllBlocks() {
   removeTriggers_();
-  const timeMin = new Date();
-  timeMin.setDate(timeMin.getDate() - 30);
-  const timeMax = new Date();
-  timeMax.setDate(timeMax.getDate() + CONFIG.DAYS_AHEAD + 30);
-  reconcile_(CONFIG.WORK_CALENDAR_ID, [], TAG_FROM_PERSONAL, '', timeMin, timeMax);
-  reconcile_(CONFIG.PERSONAL_TARGET_CALENDAR_ID, [], TAG_FROM_WORK, '', timeMin, timeMax);
+  const deadline = Date.now() + 5 * 60 * 1000;
+  const targets = [
+    [CONFIG.WORK_CALENDAR_ID, TAG_FROM_PERSONAL],
+    [CONFIG.PERSONAL_TARGET_CALENDAR_ID, TAG_FROM_WORK],
+  ];
+  let left = 0;
+  for (const [calendarId, tag] of targets) {
+    const blocks = listEvents_(calendarId, null, null, {
+      privateExtendedProperty: `${TAG_KEY}=${tag}`,
+    }).filter(e => e.status !== 'cancelled');
+    let deleted = 0;
+    for (const e of blocks) {
+      if (Date.now() > deadline) break;
+      Calendar.Events.remove(calendarId, e.id);
+      deleted++;
+    }
+    left += blocks.length - deleted;
+    console.log(`${calendarId} [${tag}]: ${deleted} removed, ${blocks.length - deleted} left`);
+  }
+  console.log(left
+    ? `${left} blocks left. Run removeAllBlocks again to finish.`
+    : 'All blocks removed.');
 }
 
 // ---------------------------------------------------------------------------
@@ -128,7 +148,8 @@ function workBusyIntervals_(timeMin, timeMax) {
 
 /**
  * Makes the tagged blocks on `calendarId` match `intervals` exactly:
- * creates missing blocks, deletes stale or duplicate ones, leaves matches alone.
+ * creates missing blocks, deletes stale or duplicate ones, and renames matches
+ * whose title differs from `title`.
  */
 function reconcile_(calendarId, intervals, tag, title, timeMin, timeMax) {
   const existing = listEvents_(calendarId, timeMin, timeMax, {
@@ -138,11 +159,16 @@ function reconcile_(calendarId, intervals, tag, title, timeMin, timeMax) {
   const wanted = new Map(intervals.map(i => [key_(i), i]));
   let created = 0;
   let deleted = 0;
+  let renamed = 0;
 
   for (const e of existing) {
     const k = key_({ start: Date.parse(e.start.dateTime), end: Date.parse(e.end.dateTime) });
     if (wanted.has(k)) {
       wanted.delete(k); // already in place (a second copy will be deleted below)
+      if (e.summary !== title) {
+        Calendar.Events.patch({ summary: title }, calendarId, e.id);
+        renamed++;
+      }
     } else {
       Calendar.Events.remove(calendarId, e.id);
       deleted++;
@@ -163,7 +189,7 @@ function reconcile_(calendarId, intervals, tag, title, timeMin, timeMax) {
   }
 
   console.log(`${calendarId} [${tag}]: ${created} created, ${deleted} removed, ` +
-    `${existing.length - deleted} unchanged`);
+    `${renamed} renamed, ${existing.length - deleted - renamed} unchanged`);
 }
 
 function listEvents_(calendarId, timeMin, timeMax, extraParams) {
@@ -171,11 +197,12 @@ function listEvents_(calendarId, timeMin, timeMax, extraParams) {
   let pageToken = null;
   do {
     const params = Object.assign({
-      timeMin: timeMin.toISOString(),
-      timeMax: timeMax.toISOString(),
       singleEvents: true,
       maxResults: 2500,
     }, extraParams || {});
+    // A null bound means no limit on that side.
+    if (timeMin) params.timeMin = timeMin.toISOString();
+    if (timeMax) params.timeMax = timeMax.toISOString();
     if (pageToken) params.pageToken = pageToken;
     const res = Calendar.Events.list(calendarId, params);
     items.push(...(res.items || []));
@@ -226,7 +253,7 @@ function validateConfig_() {
   if (!CONFIG.PERSONAL_TARGET_CALENDAR_ID) throw new Error('PERSONAL_TARGET_CALENDAR_ID is not set.');
   // Reading the target calendar as a source would copy work blocks back to work.
   if (sources.includes(CONFIG.PERSONAL_TARGET_CALENDAR_ID)) {
-    throw new Error('The "Work busy" calendar must not be listed as a personal source.');
+    throw new Error('The "Work Busy" calendar must not be listed as a personal source.');
   }
   if (sources.includes(CONFIG.WORK_CALENDAR_ID)) {
     throw new Error('The work calendar must not be listed as a personal source.');
