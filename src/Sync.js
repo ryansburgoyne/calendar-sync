@@ -12,7 +12,16 @@
 
 const TAG_KEY = 'calsync';
 const TAG_FROM_PERSONAL = 'from-personal'; // blocks on the work calendar
-const TAG_FROM_WORK = 'from-work';         // blocks on the personal "Work Busy" calendar
+// Blocks on the personal "Work Busy" calendar. INSTANCE_NAME makes the tag
+// unique, so several copies of this script can share one calendar.
+function workTag_() {
+  const name = CONFIG.INSTANCE_NAME;
+  if (!name) throw new Error('INSTANCE_NAME is not set.');
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) {
+    throw new Error('INSTANCE_NAME may only contain letters, digits, - and _.');
+  }
+  return `from-work:${name}`;
+}
 
 // Work event types that shouldn't block personal time.
 const SKIP_EVENT_TYPES = ['outOfOffice', 'workingLocation', 'birthday'];
@@ -35,7 +44,7 @@ function syncNow() {
 
     // Work -> personal
     const workBusy = workBusyIntervals_(timeMin, timeMax);
-    reconcile_(CONFIG.PERSONAL_TARGET_CALENDAR_ID, workBusy, TAG_FROM_WORK,
+    reconcile_(CONFIG.PERSONAL_TARGET_CALENDAR_ID, workBusy, workTag_(),
       CONFIG.PERSONAL_BLOCK_TITLE, timeMin, timeMax);
   } finally {
     lock.releaseLock();
@@ -64,12 +73,12 @@ function uninstallTrigger() {
  * if blocks are left, the log says so and you can run it again.
  */
 function removeAllBlocks() {
-  removeTriggers_();
-  const deadline = Date.now() + 5 * 60 * 1000;
   const targets = [
     [CONFIG.WORK_CALENDAR_ID, TAG_FROM_PERSONAL],
-    [CONFIG.PERSONAL_TARGET_CALENDAR_ID, TAG_FROM_WORK],
+    [CONFIG.PERSONAL_TARGET_CALENDAR_ID, workTag_()], // throws before anything is removed
   ];
+  removeTriggers_();
+  const deadline = Date.now() + 5 * 60 * 1000;
   let left = 0;
   for (const [calendarId, tag] of targets) {
     const blocks = listEvents_(calendarId, null, null, {
@@ -258,4 +267,5 @@ function validateConfig_() {
   if (sources.includes(CONFIG.WORK_CALENDAR_ID)) {
     throw new Error('The work calendar must not be listed as a personal source.');
   }
+  workTag_(); // throws if INSTANCE_NAME is missing or invalid
 }

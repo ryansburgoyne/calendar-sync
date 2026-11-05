@@ -22,6 +22,11 @@ const CONFIG = {
   // Share it with your work account as "Make changes to events".
   PERSONAL_TARGET_CALENDAR_ID: 'xxxxxxxx@group.calendar.google.com',
 
+  // A short name for this copy of the script, e.g. your company (letters,
+  // digits, - and _). Required. If several copies share one "Work Busy"
+  // calendar, give each a different name so each only touches its own blocks.
+  INSTANCE_NAME: '',
+
   // Titles for the blocks the script creates.
   WORK_BLOCK_TITLE: 'Busy',
   PERSONAL_BLOCK_TITLE: 'Work Meetings',
