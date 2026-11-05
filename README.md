@@ -1,6 +1,10 @@
 # Calendar Sync
 
-An Apps Script project that runs in your **work** Google account and keeps busy time in sync:
+If you keep separate work and personal calendars, your coworkers can't see when you're busy with personal things, and your family can't see when you're in meetings. Calendar Sync copies busy time both ways as plain blocks, so everyone can see when you're available. It works with one or more work calendars.
+
+It's a Google Apps Script project that runs inside your work Google Workspace account, so no private information is shared: your work calendar sees only free/busy from your personal calendars, your personal calendar gets time blocks without meeting titles, attendees or details, and nothing is sent anywhere outside Google Calendar. Each person runs their own copy; there's no server or shared app.
+
+How it works:
 
 - **Personal → work:** busy times from your personal calendars become "Busy" blocks on your work calendar. Only free/busy is read, never titles or details.
 - **Work → personal:** your work meetings become "Work Meetings" blocks on a dedicated "Work Busy" calendar in your personal account.
@@ -8,8 +12,6 @@ An Apps Script project that runs in your **work** Google account and keeps busy 
 Blocks have no reminders, show as busy, and are private. Every block is tagged, so the script never copies its own blocks (no loops) and never edits or deletes your real events.
 
 By default it syncs from yesterday through 14 days ahead every 15 minutes, and skips all-day events, declined events, events marked "free", and Out of office / working location events.
-
-Each person runs their own copy of the script in their own Google account. It talks only to Google Calendar: no data is sent to any other service, and there's no server or shared app involved.
 
 ## 1. Share the calendars
 
