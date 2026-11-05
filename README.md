@@ -9,6 +9,8 @@ Blocks have no reminders, show as busy, and are private. Every block is tagged, 
 
 By default it syncs from yesterday through 14 days ahead every 15 minutes, and skips all-day events, declined events, events marked "free", and Out of office / working location events.
 
+Each person runs their own copy of the script in their own Google account. It talks only to Google Calendar: no data is sent to any other service, and there's no server or shared app involved.
+
 ## 1. Share the calendars
 
 In your **personal** Google Calendar:
@@ -76,3 +78,7 @@ Signed in as your **work** account:
 - Overlapping or back-to-back events are merged into one block.
 - Several work accounts can share one Work Busy calendar: run a separate copy of the script in each, and give each copy a different `INSTANCE_NAME` in its `src/Config.js` so it only edits and removes its own blocks. Each copy can also use its own `PERSONAL_BLOCK_TITLE`. Before changing a copy's `INSTANCE_NAME`, run **removeAllBlocks** in it (then **installTrigger**); blocks made under the old name are otherwise left behind.
 - If a personal calendar becomes unreadable (e.g. sharing removed), the run fails instead of deleting that calendar's blocks.
+
+## License
+
+[MIT](LICENSE). Provided as is, with no warranty. The script only edits or deletes the blocks it created itself, but you run it at your own risk.

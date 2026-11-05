@@ -1,6 +1,7 @@
 {
   "name": "calendar-sync",
   "private": true,
+  "license": "MIT",
   "description": "Apps Script project that syncs busy time between work and personal Google calendars",
   "scripts": {
     "login": "clasp login",
