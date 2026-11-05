@@ -1,0 +1,13 @@
+{
+  "name": "calendar-sync",
+  "private": true,
+  "description": "Apps Script project that syncs busy time between work and personal Google calendars",
+  "scripts": {
+    "login": "clasp login",
+    "push": "clasp push",
+    "open": "clasp open-script"
+  },
+  "devDependencies": {
+    "@google/clasp": "3.4.1"
+  }
+}
