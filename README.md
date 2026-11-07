@@ -10,7 +10,7 @@ How it works:
 - **Work → personal:** your work meetings become "Work Meetings" blocks on a dedicated "Work Busy" calendar in your personal account.
 - **Work → other work:** with more than one job, run a copy in each work account, each with its own Work Busy calendar. Each copy reads the other companies' Work Busy calendars like personal ones, so a meeting at one company shows as "Busy" at the others.
 
-Blocks have no reminders, show as busy, and are private. Every block is tagged, so the script never copies its own blocks (no loops) and never edits or deletes your real events.
+Blocks have no reminders, show as busy, and use the calendar's default visibility. Every block is tagged, so the script never copies its own blocks (no loops) and never edits or deletes your real events.
 
 By default it syncs from yesterday through 14 days ahead every 15 minutes, and skips all-day events, declined events, events marked "free", and Out of office / working location events.
 
