@@ -12,16 +12,7 @@
 
 const TAG_KEY = 'calsync';
 const TAG_FROM_PERSONAL = 'from-personal'; // blocks on the work calendar
-// Blocks on the personal "Work Busy" calendar. INSTANCE_NAME makes the tag
-// unique, so several copies of this script can share one calendar.
-function workTag_() {
-  const name = CONFIG.INSTANCE_NAME;
-  if (!name) throw new Error('INSTANCE_NAME is not set.');
-  if (!/^[A-Za-z0-9_-]+$/.test(name)) {
-    throw new Error('INSTANCE_NAME may only contain letters, digits, - and _.');
-  }
-  return `from-work:${name}`;
-}
+const TAG_FROM_WORK = 'from-work';         // blocks on the personal "Work Busy" calendar
 
 // Work event types that shouldn't block personal time.
 const SKIP_EVENT_TYPES = ['outOfOffice', 'workingLocation', 'birthday'];
@@ -44,7 +35,7 @@ function syncNow() {
 
     // Work -> personal
     const workBusy = workBusyIntervals_(timeMin, timeMax);
-    reconcile_(CONFIG.PERSONAL_TARGET_CALENDAR_ID, workBusy, workTag_(),
+    reconcile_(CONFIG.PERSONAL_TARGET_CALENDAR_ID, workBusy, TAG_FROM_WORK,
       CONFIG.PERSONAL_BLOCK_TITLE, timeMin, timeMax);
   } finally {
     lock.releaseLock();
@@ -75,7 +66,7 @@ function uninstallTrigger() {
 function removeAllBlocks() {
   const targets = [
     [CONFIG.WORK_CALENDAR_ID, TAG_FROM_PERSONAL],
-    [CONFIG.PERSONAL_TARGET_CALENDAR_ID, workTag_()], // throws before anything is removed
+    [CONFIG.PERSONAL_TARGET_CALENDAR_ID, TAG_FROM_WORK],
   ];
   removeTriggers_();
   const deadline = Date.now() + 5 * 60 * 1000;
@@ -262,10 +253,9 @@ function validateConfig_() {
   if (!CONFIG.PERSONAL_TARGET_CALENDAR_ID) throw new Error('PERSONAL_TARGET_CALENDAR_ID is not set.');
   // Reading the target calendar as a source would copy work blocks back to work.
   if (sources.includes(CONFIG.PERSONAL_TARGET_CALENDAR_ID)) {
-    throw new Error('The "Work Busy" calendar must not be listed as a personal source.');
+    throw new Error('This copy\'s own "Work Busy" calendar must not be listed as a personal source.');
   }
   if (sources.includes(CONFIG.WORK_CALENDAR_ID)) {
     throw new Error('The work calendar must not be listed as a personal source.');
   }
-  workTag_(); // throws if INSTANCE_NAME is missing or invalid
 }

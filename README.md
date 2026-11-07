@@ -1,6 +1,6 @@
 # Calendar Sync
 
-If you keep separate work and personal calendars, your coworkers can't see when you're busy with personal things, and your family can't see when you're in meetings. Calendar Sync copies busy time both ways as plain blocks, so everyone can see when you're available. It works with one or more work calendars.
+If you keep separate work and personal calendars, your coworkers can't see when you're busy with personal things, and your family can't see when you're in meetings. Calendar Sync copies busy time both ways as plain blocks, so everyone can see when you're available. It also works with more than one job: each company's meetings block time at the others.
 
 It's a Google Apps Script project that runs inside your work Google Workspace account, so no private information is shared: your work calendar sees only free/busy from your personal calendars, your personal calendar gets time blocks without meeting titles, attendees or details, and nothing is sent anywhere outside Google Calendar. Each person runs their own copy; there's no server or shared app.
 
@@ -8,6 +8,7 @@ How it works:
 
 - **Personal → work:** busy times from your personal calendars become "Busy" blocks on your work calendar. Only free/busy is read, never titles or details.
 - **Work → personal:** your work meetings become "Work Meetings" blocks on a dedicated "Work Busy" calendar in your personal account.
+- **Work → other work:** with more than one job, run a copy in each work account, each with its own Work Busy calendar. Each copy reads the other companies' Work Busy calendars like personal ones, so a meeting at one company shows as "Busy" at the others.
 
 Blocks have no reminders, show as busy, and are private. Every block is tagged, so the script never copies its own blocks (no loops) and never edits or deletes your real events.
 
@@ -17,9 +18,9 @@ By default it syncs from yesterday through 14 days ahead every 15 minutes, and s
 
 In your **personal** Google Calendar:
 
-1. Create a new calendar called **Work Busy**.
+1. Create a new calendar called **Work Busy**. With more than one job, create one per company (e.g. **Work Busy – Acme**).
 2. Share **Work Busy** with your work address: **Make changes to events**.
-3. Share each personal calendar that should block work time with your work address: **See only free/busy (hide details)**.
+3. Share each personal calendar that should block work time with your work address: **See only free/busy (hide details)**. With more than one job, also share every *other* company's Work Busy calendar this way.
 4. Note each calendar's ID (Settings → the calendar → *Integrate calendar*).
 
 In your **work** account, accept the shares if prompted (or add each calendar via *Other calendars → Subscribe*).
@@ -78,7 +79,9 @@ Signed in as your **work** account:
 
 - `src/Config.js` and `.clasp.json` hold your personal settings and are gitignored, so they aren't backed up by git. If you lose them, recover both from the Apps Script project: `npx clasp clone <scriptId> --rootDir src` (the script ID is in the editor's URL), then `git checkout -- src/appsscript.json src/Sync.js` to keep the repo's versions of those files.
 - Overlapping or back-to-back events are merged into one block.
-- Several work accounts can share one Work Busy calendar: run a separate copy of the script in each, and give each copy a different `INSTANCE_NAME` in its `src/Config.js` so it only edits and removes its own blocks. Each copy can also use its own `PERSONAL_BLOCK_TITLE`. Before changing a copy's `INSTANCE_NAME`, run **removeAllBlocks** in it (then **installTrigger**); blocks made under the old name are otherwise left behind.
+- More than one job: run a separate copy of the script in each work account (its own clasp project and `src/Config.js`). Give each copy its own Work Busy calendar as `PERSONAL_TARGET_CALENDAR_ID`, and list the other companies' Work Busy calendars in `PERSONAL_SOURCE_CALENDAR_IDS`. Never point two copies at the same Work Busy calendar: each would delete the other's blocks. Each copy can use its own `PERSONAL_BLOCK_TITLE`. A meeting can take up to two sync intervals to reach another company, since it passes through a Work Busy calendar on the way.
+- Before changing `PERSONAL_TARGET_CALENDAR_ID`, run **removeAllBlocks** (then **installTrigger** after pushing); blocks on the old calendar are otherwise left behind.
+- Upgrading from a version with `INSTANCE_NAME`: run **removeAllBlocks** in the editor *before* `npm run push`, since the new code can't find blocks the old code made. Then remove `INSTANCE_NAME` from `src/Config.js`, push, and run **installTrigger**.
 - If a personal calendar becomes unreadable (e.g. sharing removed), the run fails instead of deleting that calendar's blocks.
 
 ## License
