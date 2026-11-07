@@ -18,12 +18,16 @@ By default it syncs from yesterday through 14 days ahead every 15 minutes, and s
 
 In your **personal** Google Calendar:
 
-1. Create a new calendar called **Work Busy**. With more than one job, create one per company (e.g. **Work Busy – Acme**).
-2. Share **Work Busy** with your work address: **Make changes to events**.
+1. Create a new calendar to receive your work blocks. This README calls it the **Work Busy** calendar, but name it after the company (e.g. **Acme**) and give it the company's color, so you can tell at a glance whose meetings they are. With more than one job, create one per company.
+2. Share the Work Busy calendar with your work address: **Make changes to events**.
 3. Share each personal calendar that should block work time with your work address: **See only free/busy (hide details)**. With more than one job, also share every *other* company's Work Busy calendar this way.
 4. Note each calendar's ID (Settings → the calendar → *Integrate calendar*).
 
-In your **work** account, accept the shares if prompted (or add each calendar via *Other calendars → Subscribe*).
+In your **work** Google Calendar:
+
+1. Accept the shares if prompted (or add each calendar via *Other calendars → Subscribe*).
+2. Rename this company's Work Busy calendar to **Work Busy** and give it a neutral color like gray. Here it holds copies of your own meetings, so the company name and color don't help. The name and color change only in this account.
+3. Uncheck every shared calendar in the sidebar: your personal calendars, Work Busy, and any other company's Work Busy. Their busy times already appear on your work calendar as blocks, or are copies of your own meetings, so showing them only adds duplicates. Hiding them doesn't affect the sync.
 
 If you get emails when the script adds blocks to Work Busy, turn off its email notifications in that calendar's settings.
 
