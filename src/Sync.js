@@ -149,7 +149,7 @@ function workBusyIntervals_(timeMin, timeMax) {
 /**
  * Makes the tagged blocks on `calendarId` match `intervals` exactly:
  * creates missing blocks, deletes stale or duplicate ones, and updates matches
- * whose title differs from `title` or whose visibility isn't the default.
+ * whose title differs from `title`.
  */
 function reconcile_(calendarId, intervals, tag, title, timeMin, timeMax) {
   const existing = listEvents_(calendarId, timeMin, timeMax, {
@@ -165,9 +165,8 @@ function reconcile_(calendarId, intervals, tag, title, timeMin, timeMax) {
     const k = key_({ start: Date.parse(e.start.dateTime), end: Date.parse(e.end.dateTime) });
     if (wanted.has(k)) {
       wanted.delete(k); // already in place (a second copy will be deleted below)
-      // Older versions made blocks private; reset those to the default too.
-      if (e.summary !== title || (e.visibility || 'default') !== 'default') {
-        Calendar.Events.patch({ summary: title, visibility: 'default' }, calendarId, e.id);
+      if (e.summary !== title) {
+        Calendar.Events.patch({ summary: title }, calendarId, e.id);
         updated++;
       }
     } else {
